@@ -115,3 +115,55 @@ Step 2: Supply chain model and unit tests completed.
 The frontend is not yet connected to the Python model.
 Database and backend integration will be completed
 during later project stages.
+
+## Step 3: MySQL Data Model
+
+The MY Diners database was made in MySQL to improve order tracking, litchen workload monitoring and inventory visibility.
+
+### Database Tables
+Database tables include:
+- `kitchen_stations` stores the kitchen stations and their workload limits.
+- `menu_items` stores menu information as well as connects each item to a kitchen station.
+- `orders` stores customer orders, order channels as well as order statuses.
+- `order_items` links orders to their menu items and records quantity, price and preparation status.
+- `inventory` stores ingredient quantities, units and reorder levels.
+
+### Table Relationships
+Table relationships include:
+- One kitchen station prepares many menu items.
+- One order  contains many order items.
+- One menu item appears in many order items.
+- The `order_items` table resolves the many-to-many relationship between `orders` and `menu_items`.
+- Inventory is maintained separately because the current prototype monitors ingredient stock without linking individual ingredients to menu recipes.
+
+### Normalization
+
+The database is normalized to Third Normal Form (3NF) where practical. Each table represents one main subject, repeating data has been separated, and non-key fields depend on the primary key of their table. The `order_items` connecting table prevents menu-item information from being repeated inside the `orders` table.
+
+### Keys, Constraints and Audit Fields
+
+Primary keys uniquely identify each record. Foreign keys maintain the relationships between kitchen stations, menu items, orders and order items. `NOT NULL`, `UNIQUE` and `CHECK` constraints are used to protect data quality. The tables also contain `created_at` and `updated_at` audit fields.
+
+### Performance Indexes
+
+The following indexes support the main read patterns of the application:
+
+- `idx_orders_status_received` supports obtaining the order queue by status and received time.
+- `idx_order_items_order_status` supports obtaining the preparation statuses for a specific order.
+- `idx_inventory_quantity_reorder` supports comparisons between available quantities and reorder levels.
+
+### Migration Plan
+
+The initial database structure is stored in `mydinersschema.sql`. It must be executed before the seed file. Future database changes will be saved as separate numbered SQL migration files so that changes can be applied in the correct order without replacing the existing database unexpectedly. Each migration will be tested on a development database before it is applied to the main project database.
+
+### Seed Data
+
+The `seed.sql` file contains realistic demonstration data for kitchen stations, menu items, orders, order items and inventory. The schema file must be executed first, followed by the seed file.
+
+### Database Setup
+
+1. Open MySQL Workbench.
+2. Open and execute `mydinersschema.sql`.
+3. Open and execute `seed.sql`.
+4. Refresh the Schemas panel.
+5. Confirm that all five tables and the demonstration records are available.
