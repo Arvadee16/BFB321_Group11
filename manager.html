@@ -1,10 +1,12 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
     <title>MY Diners - Manager</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -12,55 +14,325 @@
 <body>
 
     <header>
-        <img src="logo.png" alt="MY Diners Logo" class="logo">
+        <img
+            src="logo.png"
+            alt="MY Diners Logo"
+            class="logo"
+        >
         <h1>MY Diners</h1>
         <p>Manager Dashboard</p>
     </header>
 
     <nav aria-label="Main navigation">
-        <a href="index.html">Orders</a>
-        <a href="kitchen.html">Kitchen</a>
-        <a href="manager.html">Manager</a>
+        <a href="/orders">Orders</a>
+        <a href="/kitchen">Kitchen</a>
+        <a href="/manager">Manager</a>
     </nav>
 
     <main>
 
         <section>
-            <h2>Manager Dashboard</h2>
+            <h2>Live Inventory Dashboard</h2>
 
             <p>
-                Monitor customer orders and kitchen preparation progress.
+                Monitor inventory levels using live information
+                from the MY Diners database.
             </p>
 
             <div class="dashboard">
 
                 <div class="dashboard-card">
-                    <h3>Total Orders</h3>
-                    <p>3</p>
+                    <h3>Total Items</h3>
+                    <p id="total-items">0</p>
                 </div>
 
                 <div class="dashboard-card">
-                    <h3>Waiting Orders</h3>
-                    <p>1</p>
+                    <h3>Items In Stock</h3>
+                    <p id="in-stock">0</p>
                 </div>
 
                 <div class="dashboard-card">
-                    <h3>Preparing Orders</h3>
-                    <p>1</p>
+                    <h3>Reorder Required</h3>
+                    <p id="low-stock">0</p>
                 </div>
 
                 <div class="dashboard-card">
-                    <h3>Completed Orders</h3>
-                    <p>1</p>
+                    <h3>Stock Availability</h3>
+                    <p id="stock-availability">0%</p>
                 </div>
 
             </div>
+        </section>
 
-            <p class="help-text">
-                These statistics are based on sample orders.
-                Live information will be added during backend integration.
+        <section>
+            <h2>EOQ Recommendation</h2>
+
+            <form id="eoq-form">
+
+                <label for="annual-demand">
+                    Annual Demand:
+                </label>
+                <input
+                    type="number"
+                    id="annual-demand"
+                    min="0.01"
+                    step="0.01"
+                    required
+                >
+
+                <label for="order-cost">
+                    Order Cost (R):
+                </label>
+                <input
+                    type="number"
+                    id="order-cost"
+                    min="0.01"
+                    step="0.01"
+                    required
+                >
+
+                <label for="holding-cost">
+                    Annual Holding Cost (R):
+                </label>
+                <input
+                    type="number"
+                    id="holding-cost"
+                    min="0.01"
+                    step="0.01"
+                    required
+                >
+
+                <button type="submit">
+                    Calculate EOQ
+                </button>
+
+            </form>
+
+            <p id="eoq-message">
+                Enter the inventory planning values.
             </p>
 
+            <div id="eoq-results" hidden>
+                <p>
+                    Optimal Order Quantity:
+                    <strong id="eoq-value"></strong>
+                </p>
+
+                <p>
+                    Orders Per Year:
+                    <strong id="orders-per-year"></strong>
+                </p>
+
+                <p>
+                    Days Between Orders:
+                    <strong id="days-between-orders"></strong>
+                </p>
+
+                <p>
+                    Total Annual Cost: R
+                    <strong id="annual-cost"></strong>
+                </p>
+            </div>
+        </section>
+
+        <section>
+            <h2>Manager Login</h2>
+
+            <form id="login-form">
+                <label for="username">
+                    Username:
+                </label>
+                <input
+                    type="text"
+                    id="username"
+                    value="admin"
+                    required
+                >
+
+                <label for="password">
+                    Password:
+                </label>
+                <input
+                    type="password"
+                    id="password"
+                    value="admin123"
+                    required
+                >
+
+                <button type="submit">
+                    Login
+                </button>
+            </form>
+
+            <p id="login-message">
+                Log in to create or update inventory.
+            </p>
+        </section>
+
+        <section>
+            <h2>Add Inventory Item</h2>
+
+            <form id="create-form">
+                <fieldset
+                    id="create-fields"
+                    disabled
+                >
+
+                    <label for="ingredient-name">
+                        Ingredient Name:
+                    </label>
+                    <input
+                        type="text"
+                        id="ingredient-name"
+                        required
+                    >
+
+                    <label for="quantity">
+                        Quantity:
+                    </label>
+                    <input
+                        type="number"
+                        id="quantity"
+                        min="0"
+                        step="0.01"
+                        required
+                    >
+
+                    <label for="reorder-level">
+                        Reorder Level:
+                    </label>
+                    <input
+                        type="number"
+                        id="reorder-level"
+                        min="0"
+                        step="0.01"
+                        required
+                    >
+
+                    <label for="unit">
+                        Unit:
+                    </label>
+                    <input
+                        type="text"
+                        id="unit"
+                        placeholder="kg, litres or portions"
+                        required
+                    >
+
+                    <button type="submit">
+                        Add Item
+                    </button>
+
+                </fieldset>
+            </form>
+
+            <p id="create-message">
+                Login is required before adding an item.
+            </p>
+        </section>
+
+        <section>
+            <h2>Update Inventory Item</h2>
+
+            <form id="update-form">
+                <fieldset
+                    id="update-fields"
+                    disabled
+                >
+
+                    <label for="update-id">
+                        Inventory ID:
+                    </label>
+                    <input
+                        type="number"
+                        id="update-id"
+                        min="1"
+                        required
+                    >
+
+                    <label for="update-quantity">
+                        New Quantity:
+                    </label>
+                    <input
+                        type="number"
+                        id="update-quantity"
+                        min="0"
+                        step="0.01"
+                        required
+                    >
+
+                    <label for="update-reorder-level">
+                        New Reorder Level:
+                    </label>
+                    <input
+                        type="number"
+                        id="update-reorder-level"
+                        min="0"
+                        step="0.01"
+                        required
+                    >
+
+                    <button type="submit">
+                        Update Item
+                    </button>
+
+                </fieldset>
+            </form>
+
+            <p id="update-message">
+                Login is required before updating an item.
+            </p>
+        </section>
+
+        <section>
+            <h2>Inventory List</h2>
+
+            <form id="filter-form">
+                <label for="name-filter">
+                    Filter by ingredient name:
+                </label>
+
+                <input
+                    type="text"
+                    id="name-filter"
+                    placeholder="For example, Chicken"
+                >
+
+                <button type="submit">
+                    Search
+                </button>
+
+                <button
+                    type="button"
+                    id="clear-filter"
+                >
+                    Clear
+                </button>
+            </form>
+
+            <p id="inventory-message">
+                Loading inventory...
+            </p>
+
+            <div
+                id="inventory-table-container"
+                hidden
+            >
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Ingredient</th>
+                            <th>Quantity</th>
+                            <th>Reorder Level</th>
+                            <th>Unit</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="inventory-table-body"></tbody>
+                </table>
+            </div>
         </section>
 
     </main>
@@ -68,6 +340,576 @@
     <footer>
         <p>Group 11 - MY Diners</p>
     </footer>
+
+    <script>
+        let accessToken = "";
+
+        const inventoryMessage =
+            document.getElementById(
+                "inventory-message"
+            );
+
+        const tableContainer =
+            document.getElementById(
+                "inventory-table-container"
+            );
+
+        const tableBody =
+            document.getElementById(
+                "inventory-table-body"
+            );
+
+        async function loadInventory(
+            name = ""
+        ) {
+            inventoryMessage.textContent =
+                "Loading inventory...";
+
+            tableContainer.hidden = true;
+
+            try {
+                let url =
+                    "/api/inventory?page=1&size=100";
+
+                if (name) {
+                    url +=
+                        "&name=" +
+                        encodeURIComponent(name);
+                }
+
+                const response =
+                    await fetch(url);
+
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.error ||
+                        "Unable to load inventory"
+                    );
+                }
+
+                displayInventory(data.items);
+            } catch (error) {
+                inventoryMessage.textContent =
+                    "Error: " + error.message;
+            }
+        }
+
+        function displayInventory(items) {
+            tableBody.innerHTML = "";
+
+            const totalItems = items.length;
+
+            const lowStockItems =
+                items.filter(
+                    item =>
+                        Number(
+                            item.inventory_quantity
+                        ) <=
+                        Number(
+                            item.inventory_reorder_level
+                        )
+                );
+
+            const availableItems =
+                totalItems -
+                lowStockItems.length;
+
+            const availability =
+                totalItems === 0
+                    ? 0
+                    : Math.round(
+                        (
+                            availableItems /
+                            totalItems
+                        ) * 100
+                    );
+
+            document.getElementById(
+                "total-items"
+            ).textContent = totalItems;
+
+            document.getElementById(
+                "in-stock"
+            ).textContent = availableItems;
+
+            document.getElementById(
+                "low-stock"
+            ).textContent =
+                lowStockItems.length;
+
+            document.getElementById(
+                "stock-availability"
+            ).textContent =
+                availability + "%";
+
+            if (items.length === 0) {
+                inventoryMessage.textContent =
+                    "No inventory items found.";
+
+                tableContainer.hidden = true;
+                return;
+            }
+
+            items.forEach(item => {
+                const quantity =
+                    Number(
+                        item.inventory_quantity
+                    );
+
+                const reorderLevel =
+                    Number(
+                        item.inventory_reorder_level
+                    );
+
+                const status =
+                    quantity <= reorderLevel
+                        ? "Reorder Required"
+                        : "In Stock";
+
+                const row =
+                    document.createElement("tr");
+
+                const idCell =
+                    document.createElement("td");
+
+                const nameCell =
+                    document.createElement("td");
+
+                const quantityCell =
+                    document.createElement("td");
+
+                const reorderCell =
+                    document.createElement("td");
+
+                const unitCell =
+                    document.createElement("td");
+
+                const statusCell =
+                    document.createElement("td");
+
+                idCell.textContent =
+                    item.inventory_id;
+
+                nameCell.textContent =
+                    item.inventory_ingredient_name;
+
+                quantityCell.textContent =
+                    quantity.toFixed(2);
+
+                reorderCell.textContent =
+                    reorderLevel.toFixed(2);
+
+                unitCell.textContent =
+                    item.inventory_unit;
+
+                statusCell.textContent =
+                    status;
+
+                row.appendChild(idCell);
+                row.appendChild(nameCell);
+                row.appendChild(quantityCell);
+                row.appendChild(reorderCell);
+                row.appendChild(unitCell);
+                row.appendChild(statusCell);
+
+                tableBody.appendChild(row);
+            });
+
+            inventoryMessage.textContent =
+                items.length +
+                " inventory item(s) loaded.";
+
+            tableContainer.hidden = false;
+        }
+
+        document.getElementById(
+            "eoq-form"
+        ).addEventListener(
+            "submit",
+            async event => {
+                event.preventDefault();
+
+                const eoqMessage =
+                    document.getElementById(
+                        "eoq-message"
+                    );
+
+                const eoqResults =
+                    document.getElementById(
+                        "eoq-results"
+                    );
+
+                eoqMessage.textContent =
+                    "Calculating EOQ...";
+
+                eoqResults.hidden = true;
+
+                const eoqData = {
+                    demand: Number(
+                        document.getElementById(
+                            "annual-demand"
+                        ).value
+                    ),
+
+                    order_cost: Number(
+                        document.getElementById(
+                            "order-cost"
+                        ).value
+                    ),
+
+                    hold_cost: Number(
+                        document.getElementById(
+                            "holding-cost"
+                        ).value
+                    )
+                };
+
+                try {
+                    const response = await fetch(
+                        "/api/eoq",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+                            body: JSON.stringify(
+                                eoqData
+                            )
+                        }
+                    );
+
+                    const data =
+                        await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(
+                            data.error ||
+                            "Unable to calculate EOQ"
+                        );
+                    }
+
+                    document.getElementById(
+                        "eoq-value"
+                    ).textContent =
+                        data.eoq;
+
+                    document.getElementById(
+                        "orders-per-year"
+                    ).textContent =
+                        data.orders_per_year;
+
+                    document.getElementById(
+                        "days-between-orders"
+                    ).textContent =
+                        data.days_between_orders;
+
+                    document.getElementById(
+                        "annual-cost"
+                    ).textContent =
+                        data.total_annual_cost;
+
+                    eoqMessage.textContent =
+                        "EOQ recommendation " +
+                        "calculated successfully.";
+
+                    eoqResults.hidden = false;
+                } catch (error) {
+                    eoqMessage.textContent =
+                        "Error: " +
+                        error.message;
+                }
+            }
+        );
+
+        document.getElementById(
+            "login-form"
+        ).addEventListener(
+            "submit",
+            async event => {
+                event.preventDefault();
+
+                const loginMessage =
+                    document.getElementById(
+                        "login-message"
+                    );
+
+                loginMessage.textContent =
+                    "Logging in...";
+
+                const loginData = {
+                    username:
+                        document.getElementById(
+                            "username"
+                        ).value,
+
+                    password:
+                        document.getElementById(
+                            "password"
+                        ).value
+                };
+
+                try {
+                    const response = await fetch(
+                        "/api/auth/login",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+                            body: JSON.stringify(
+                                loginData
+                            )
+                        }
+                    );
+
+                    const data =
+                        await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(
+                            data.error ||
+                            "Login failed"
+                        );
+                    }
+
+                    accessToken =
+                        data.access_token;
+
+                    loginMessage.textContent =
+                        "Login successful.";
+
+                    document.getElementById(
+                        "create-fields"
+                    ).disabled = false;
+
+                    document.getElementById(
+                        "create-message"
+                    ).textContent =
+                        "Enter the new inventory item.";
+
+                    document.getElementById(
+                        "update-fields"
+                    ).disabled = false;
+
+                    document.getElementById(
+                        "update-message"
+                    ).textContent =
+                        "Enter the inventory ID " +
+                        "and new stock levels.";
+                } catch (error) {
+                    loginMessage.textContent =
+                        "Error: " +
+                        error.message;
+                }
+            }
+        );
+
+        document.getElementById(
+            "create-form"
+        ).addEventListener(
+            "submit",
+            async event => {
+                event.preventDefault();
+
+                const createMessage =
+                    document.getElementById(
+                        "create-message"
+                    );
+
+                createMessage.textContent =
+                    "Adding inventory item...";
+
+                const item = {
+                    inventory_ingredient_name:
+                        document.getElementById(
+                            "ingredient-name"
+                        ).value.trim(),
+
+                    inventory_quantity:
+                        Number(
+                            document.getElementById(
+                                "quantity"
+                            ).value
+                        ),
+
+                    inventory_reorder_level:
+                        Number(
+                            document.getElementById(
+                                "reorder-level"
+                            ).value
+                        ),
+
+                    inventory_unit:
+                        document.getElementById(
+                            "unit"
+                        ).value.trim()
+                };
+
+                try {
+                    const response = await fetch(
+                        "/api/inventory",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type":
+                                    "application/json",
+                                "Authorization":
+                                    "Bearer " +
+                                    accessToken
+                            },
+                            body: JSON.stringify(
+                                item
+                            )
+                        }
+                    );
+
+                    const data =
+                        await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(
+                            data.error ||
+                            "Unable to add " +
+                            "inventory item"
+                        );
+                    }
+
+                    createMessage.textContent =
+                        data.inventory_ingredient_name +
+                        " was added successfully.";
+
+                    document.getElementById(
+                        "create-form"
+                    ).reset();
+
+                    await loadInventory();
+                } catch (error) {
+                    createMessage.textContent =
+                        "Error: " +
+                        error.message;
+                }
+            }
+        );
+
+        document.getElementById(
+            "update-form"
+        ).addEventListener(
+            "submit",
+            async event => {
+                event.preventDefault();
+
+                const updateMessage =
+                    document.getElementById(
+                        "update-message"
+                    );
+
+                updateMessage.textContent =
+                    "Updating inventory item...";
+
+                const inventoryId =
+                    document.getElementById(
+                        "update-id"
+                    ).value;
+
+                const updateData = {
+                    inventory_quantity:
+                        Number(
+                            document.getElementById(
+                                "update-quantity"
+                            ).value
+                        ),
+
+                    inventory_reorder_level:
+                        Number(
+                            document.getElementById(
+                                "update-reorder-level"
+                            ).value
+                        )
+                };
+
+                try {
+                    const response = await fetch(
+                        "/api/inventory/" +
+                        inventoryId,
+                        {
+                            method: "PATCH",
+                            headers: {
+                                "Content-Type":
+                                    "application/json",
+                                "Authorization":
+                                    "Bearer " +
+                                    accessToken
+                            },
+                            body: JSON.stringify(
+                                updateData
+                            )
+                        }
+                    );
+
+                    const data =
+                        await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(
+                            data.error ||
+                            "Unable to update " +
+                            "inventory item"
+                        );
+                    }
+
+                    updateMessage.textContent =
+                        data.inventory_ingredient_name +
+                        " was updated successfully.";
+
+                    document.getElementById(
+                        "update-form"
+                    ).reset();
+
+                    await loadInventory();
+                } catch (error) {
+                    updateMessage.textContent =
+                        "Error: " +
+                        error.message;
+                }
+            }
+        );
+
+        document.getElementById(
+            "filter-form"
+        ).addEventListener(
+            "submit",
+            event => {
+                event.preventDefault();
+
+                const name =
+                    document.getElementById(
+                        "name-filter"
+                    ).value.trim();
+
+                loadInventory(name);
+            }
+        );
+
+        document.getElementById(
+            "clear-filter"
+        ).addEventListener(
+            "click",
+            () => {
+                document.getElementById(
+                    "name-filter"
+                ).value = "";
+
+                loadInventory();
+            }
+        );
+
+        loadInventory();
+    </script>
 
 </body>
 </html>

@@ -1,10 +1,12 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
     <title>MY Diners - Orders</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -12,58 +14,119 @@
 <body>
 
     <header>
-        <img src="logo.png" alt="MY Diners Logo" class="logo">
+        <img
+            src="logo.png"
+            alt="MY Diners Logo"
+            class="logo"
+        >
         <h1>MY Diners</h1>
         <p>Smart Order Fulfilment System</p>
     </header>
 
     <nav aria-label="Main navigation">
-        <a href="index.html">Orders</a>
-        <a href="kitchen.html">Kitchen</a>
-        <a href="manager.html">Manager</a>
+        <a href="/orders">Orders</a>
+        <a href="/kitchen">Kitchen</a>
+        <a href="/manager">Manager</a>
     </nav>
 
     <main>
 
         <section>
             <h2>New Customer Order</h2>
-            <p>Enter the customer order information below.</p>
 
-            <form action="/add_order" method="POST">
+            <p>
+                Enter the customer order information below.
+            </p>
 
-                <label for="orderNumber">Order Number:</label>
+            <form id="order-form">
+
+                <label for="customer-name">
+                    Customer Name:
+                </label>
+                <input
+                    type="text"
+                    id="customer-name"
+                    required
+                >
+
+                <label for="order-channel">
+                    Order Channel:
+                </label>
+                <select
+                    id="order-channel"
+                    required
+                >
+                    <option value="">
+                        Select order channel
+                    </option>
+                    <option value="Walk-in">
+                        Walk-in
+                    </option>
+                    <option value="Takeaway">
+                        Takeaway
+                    </option>
+                    <option value="Delivery">
+                        Delivery
+                    </option>
+                </select>
+
+                <label for="menu-item">
+                    Food Item:
+                </label>
+                <select
+                    id="menu-item"
+                    required
+                >
+                    <option value="">
+                        Loading menu items...
+                    </option>
+                </select>
+
+                <label for="order-quantity">
+                    Quantity:
+                </label>
                 <input
                     type="number"
-                    id="orderNumber"
-                    name="orderNumber"
+                    id="order-quantity"
                     min="1"
+                    value="1"
                     required
-                    title="Please enter a positive order number">
+                >
 
-                <label for="orderType">Order Type:</label>
-                <select id="orderType" name="orderType" required>
-                    <option value="">Select order type</option>
-                    <option value="Walk-in">Walk-in</option>
-                    <option value="Takeaway">Takeaway</option>
-                    <option value="Delivery">Delivery</option>
-                </select>
-
-                <label for="foodItem">Food Item:</label>
-                <select id="foodItem" name="foodItem" required>
-                    <option value="">Select a food item</option>
-                    <option value="Chicken Curry">Chicken Curry</option>
-                    <option value="Grilled Chicken">Grilled Chicken</option>
-                    <option value="Biryani">Biryani</option>
-                </select>
-
-                <button type="submit">Add Order</button>
+                <button type="submit">
+                    Add Order
+                </button>
 
             </form>
 
-            <p class="help-text">
-                All fields are required. Order numbers must be positive.
+            <p id="order-message">
+                All fields are required.
+            </p>
+        </section>
+
+        <section>
+            <h2>Customer Orders</h2>
+
+            <p id="orders-message">
+                Loading orders...
             </p>
 
+            <div id="orders-table-container" hidden>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Channel</th>
+                            <th>Food Item</th>
+                            <th>Quantity</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="orders-table-body"></tbody>
+                </table>
+            </div>
         </section>
 
     </main>
@@ -71,6 +134,265 @@
     <footer>
         <p>Group 11 - MY Diners</p>
     </footer>
+
+    <script>
+        const orderMessage =
+            document.getElementById(
+                "order-message"
+            );
+
+        const ordersMessage =
+            document.getElementById(
+                "orders-message"
+            );
+
+        const tableContainer =
+            document.getElementById(
+                "orders-table-container"
+            );
+
+        const tableBody =
+            document.getElementById(
+                "orders-table-body"
+            );
+
+        const menuSelect =
+            document.getElementById(
+                "menu-item"
+            );
+
+        async function loadMenuItems() {
+            menuSelect.innerHTML =
+                "<option value=''>" +
+                "Loading menu items..." +
+                "</option>";
+
+            try {
+                const response = await fetch(
+                    "/api/menu-items"
+                );
+
+                const menuItems =
+                    await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        menuItems.error ||
+                        "Unable to load menu items"
+                    );
+                }
+
+                menuSelect.innerHTML =
+                    "<option value=''>" +
+                    "Select a food item" +
+                    "</option>";
+
+                menuItems.forEach(item => {
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
+
+                    option.value =
+                        item.menu_items_id;
+
+                    option.textContent =
+                        item.menu_items_name;
+
+                    menuSelect.appendChild(option);
+                });
+            } catch (error) {
+                menuSelect.innerHTML =
+                    "<option value=''>" +
+                    "Menu unavailable" +
+                    "</option>";
+
+                orderMessage.textContent =
+                    "Error: " + error.message;
+            }
+        }
+
+        async function loadOrders() {
+            ordersMessage.textContent =
+                "Loading orders...";
+
+            tableContainer.hidden = true;
+
+            try {
+                const response = await fetch(
+                    "/api/orders"
+                );
+
+                const orders =
+                    await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        orders.error ||
+                        "Unable to load orders"
+                    );
+                }
+
+                displayOrders(orders);
+            } catch (error) {
+                ordersMessage.textContent =
+                    "Error: " + error.message;
+            }
+        }
+
+        function displayOrders(orders) {
+            tableBody.innerHTML = "";
+
+            if (orders.length === 0) {
+                ordersMessage.textContent =
+                    "No customer orders found.";
+
+                tableContainer.hidden = true;
+                return;
+            }
+
+            orders.forEach(order => {
+                const row =
+                    document.createElement("tr");
+
+                const idCell =
+                    document.createElement("td");
+
+                const customerCell =
+                    document.createElement("td");
+
+                const channelCell =
+                    document.createElement("td");
+
+                const itemCell =
+                    document.createElement("td");
+
+                const quantityCell =
+                    document.createElement("td");
+
+                const statusCell =
+                    document.createElement("td");
+
+                idCell.textContent =
+                    order.orders_id;
+
+                customerCell.textContent =
+                    order.orders_customer_name;
+
+                channelCell.textContent =
+                    order.orders_channel;
+
+                itemCell.textContent =
+                    order.menu_items_name;
+
+                quantityCell.textContent =
+                    order.order_items_quantity;
+
+                statusCell.textContent =
+                    order.orders_status;
+
+                row.appendChild(idCell);
+                row.appendChild(customerCell);
+                row.appendChild(channelCell);
+                row.appendChild(itemCell);
+                row.appendChild(quantityCell);
+                row.appendChild(statusCell);
+
+                tableBody.appendChild(row);
+            });
+
+            ordersMessage.textContent =
+                orders.length +
+                " customer order(s) loaded.";
+
+            tableContainer.hidden = false;
+        }
+
+        document.getElementById(
+            "order-form"
+        ).addEventListener(
+            "submit",
+            async event => {
+                event.preventDefault();
+
+                orderMessage.textContent =
+                    "Adding customer order...";
+
+                const orderData = {
+                    orders_customer_name:
+                        document.getElementById(
+                            "customer-name"
+                        ).value.trim(),
+
+                    orders_channel:
+                        document.getElementById(
+                            "order-channel"
+                        ).value,
+
+                    menu_items_id:
+                        Number(
+                            document.getElementById(
+                                "menu-item"
+                            ).value
+                        ),
+
+                    order_items_quantity:
+                        Number(
+                            document.getElementById(
+                                "order-quantity"
+                            ).value
+                        )
+                };
+
+                try {
+                    const response = await fetch(
+                        "/api/orders",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+                            body: JSON.stringify(
+                                orderData
+                            )
+                        }
+                    );
+
+                    const data =
+                        await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(
+                            data.error ||
+                            "Unable to add order"
+                        );
+                    }
+
+                    orderMessage.textContent =
+                        "Order " +
+                        data.orders_id +
+                        " was added successfully.";
+
+                    document.getElementById(
+                        "order-form"
+                    ).reset();
+
+                    document.getElementById(
+                        "order-quantity"
+                    ).value = 1;
+
+                    await loadOrders();
+                } catch (error) {
+                    orderMessage.textContent =
+                        "Error: " + error.message;
+                }
+            }
+        );
+
+        loadMenuItems();
+        loadOrders();
+    </script>
 
 </body>
 </html>

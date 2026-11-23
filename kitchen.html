@@ -1,10 +1,12 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
     <title>MY Diners - Kitchen</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -12,70 +14,137 @@
 <body>
 
     <header>
-        <img src="logo.png" alt="MY Diners Logo" class="logo">
+        <img
+            src="logo.png"
+            alt="MY Diners Logo"
+            class="logo"
+        >
         <h1>MY Diners</h1>
-        <p>Kitchen Order Management</p>
+        <p>Kitchen Order Status</p>
     </header>
 
     <nav aria-label="Main navigation">
-        <a href="index.html">Orders</a>
-        <a href="kitchen.html">Kitchen</a>
-        <a href="manager.html">Manager</a>
+        <a href="/orders">Orders</a>
+        <a href="/kitchen">Kitchen</a>
+        <a href="/manager">Manager</a>
     </nav>
 
     <main>
 
         <section>
-            <h2>Kitchen Orders</h2>
+            <h2>Kitchen Dashboard</h2>
 
             <p>
-                View customer orders, kitchen stations
-                and preparation progress.
+                Monitor orders using live information from
+                the MY Diners database.
             </p>
 
-            <div class="table-container">
-                <table>
-                    <caption>Sample customer orders</caption>
+            <div class="dashboard">
 
+                <div class="dashboard-card">
+                    <h3>Total Orders</h3>
+                    <p id="total-orders">0</p>
+                </div>
+
+                <div class="dashboard-card">
+                    <h3>Received</h3>
+                    <p id="received-orders">0</p>
+                </div>
+
+                <div class="dashboard-card">
+                    <h3>Preparing</h3>
+                    <p id="preparing-orders">0</p>
+                </div>
+
+                <div class="dashboard-card">
+                    <h3>Ready</h3>
+                    <p id="ready-orders">0</p>
+                </div>
+
+                <div class="dashboard-card">
+                    <h3>Completed</h3>
+                    <p id="completed-orders">0</p>
+                </div>
+
+            </div>
+        </section>
+
+        <section>
+            <h2>Update Order Status</h2>
+
+            <form id="status-form">
+
+                <label for="order-id">
+                    Order ID:
+                </label>
+                <input
+                    type="number"
+                    id="order-id"
+                    min="1"
+                    required
+                >
+
+                <label for="order-status">
+                    New Status:
+                </label>
+                <select
+                    id="order-status"
+                    required
+                >
+                    <option value="">
+                        Select order status
+                    </option>
+                    <option value="Received">
+                        Received
+                    </option>
+                    <option value="Preparing">
+                        Preparing
+                    </option>
+                    <option value="Ready">
+                        Ready
+                    </option>
+                    <option value="Completed">
+                        Completed
+                    </option>
+                    <option value="Cancelled">
+                        Cancelled
+                    </option>
+                </select>
+
+                <button type="submit">
+                    Update Status
+                </button>
+
+            </form>
+
+            <p id="status-message">
+                Enter an order ID and select its new status.
+            </p>
+        </section>
+
+        <section>
+            <h2>Kitchen Order Queue</h2>
+
+            <p id="kitchen-message">
+                Loading orders...
+            </p>
+
+            <div id="kitchen-table-container" hidden>
+                <table>
                     <thead>
                         <tr>
-                            <th scope="col">Order Number</th>
-                            <th scope="col">Food Item</th>
-                            <th scope="col">Kitchen Station</th>
-                            <th scope="col">Status</th>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Channel</th>
+                            <th>Food Item</th>
+                            <th>Quantity</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
 
-                    <tbody>
-                        <tr>
-                            <td>101</td>
-                            <td>Chicken Curry</td>
-                            <td>Curry</td>
-                            <td>Preparing</td>
-                        </tr>
-
-                        <tr>
-                            <td>102</td>
-                            <td>Grilled Chicken</td>
-                            <td>Grill</td>
-                            <td>Waiting</td>
-                        </tr>
-
-                        <tr>
-                            <td>103</td>
-                            <td>Biryani</td>
-                            <td>Rice/Biryani</td>
-                            <td>Completed</td>
-                        </tr>
-                    </tbody>
+                    <tbody id="kitchen-table-body"></tbody>
                 </table>
             </div>
-
-            <p class="help-text">
-                These are sample orders for the frontend prototype.
-                Live order updates will be added during backend integration.
-            </p>
-
         </section>
 
     </main>
@@ -83,6 +152,242 @@
     <footer>
         <p>Group 11 - MY Diners</p>
     </footer>
+
+    <script>
+        const kitchenMessage =
+            document.getElementById(
+                "kitchen-message"
+            );
+
+        const tableContainer =
+            document.getElementById(
+                "kitchen-table-container"
+            );
+
+        const tableBody =
+            document.getElementById(
+                "kitchen-table-body"
+            );
+
+        async function loadOrders() {
+            kitchenMessage.textContent =
+                "Loading orders...";
+
+            tableContainer.hidden = true;
+
+            try {
+                const response = await fetch(
+                    "/api/orders"
+                );
+
+                const orders =
+                    await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        orders.error ||
+                        "Unable to load orders"
+                    );
+                }
+
+                displayOrders(orders);
+            } catch (error) {
+                kitchenMessage.textContent =
+                    "Error: " + error.message;
+            }
+        }
+
+        function displayOrders(orders) {
+            tableBody.innerHTML = "";
+
+            const receivedOrders =
+                orders.filter(
+                    order =>
+                        order.orders_status ===
+                        "Received"
+                );
+
+            const preparingOrders =
+                orders.filter(
+                    order =>
+                        order.orders_status ===
+                        "Preparing"
+                );
+
+            const readyOrders =
+                orders.filter(
+                    order =>
+                        order.orders_status ===
+                        "Ready"
+                );
+
+            const completedOrders =
+                orders.filter(
+                    order =>
+                        order.orders_status ===
+                        "Completed"
+                );
+
+            document.getElementById(
+                "total-orders"
+            ).textContent = orders.length;
+
+            document.getElementById(
+                "received-orders"
+            ).textContent =
+                receivedOrders.length;
+
+            document.getElementById(
+                "preparing-orders"
+            ).textContent =
+                preparingOrders.length;
+
+            document.getElementById(
+                "ready-orders"
+            ).textContent =
+                readyOrders.length;
+
+            document.getElementById(
+                "completed-orders"
+            ).textContent =
+                completedOrders.length;
+
+            if (orders.length === 0) {
+                kitchenMessage.textContent =
+                    "No customer orders found.";
+
+                tableContainer.hidden = true;
+                return;
+            }
+
+            orders.forEach(order => {
+                const row =
+                    document.createElement("tr");
+
+                const idCell =
+                    document.createElement("td");
+
+                const customerCell =
+                    document.createElement("td");
+
+                const channelCell =
+                    document.createElement("td");
+
+                const itemCell =
+                    document.createElement("td");
+
+                const quantityCell =
+                    document.createElement("td");
+
+                const statusCell =
+                    document.createElement("td");
+
+                idCell.textContent =
+                    order.orders_id;
+
+                customerCell.textContent =
+                    order.orders_customer_name;
+
+                channelCell.textContent =
+                    order.orders_channel;
+
+                itemCell.textContent =
+                    order.menu_items_name;
+
+                quantityCell.textContent =
+                    order.order_items_quantity;
+
+                statusCell.textContent =
+                    order.orders_status;
+
+                row.appendChild(idCell);
+                row.appendChild(customerCell);
+                row.appendChild(channelCell);
+                row.appendChild(itemCell);
+                row.appendChild(quantityCell);
+                row.appendChild(statusCell);
+
+                tableBody.appendChild(row);
+            });
+
+            kitchenMessage.textContent =
+                orders.length +
+                " kitchen order(s) loaded.";
+
+            tableContainer.hidden = false;
+        }
+
+        document.getElementById(
+            "status-form"
+        ).addEventListener(
+            "submit",
+            async event => {
+                event.preventDefault();
+
+                const statusMessage =
+                    document.getElementById(
+                        "status-message"
+                    );
+
+                statusMessage.textContent =
+                    "Updating order status...";
+
+                const orderId =
+                    document.getElementById(
+                        "order-id"
+                    ).value;
+
+                const updateData = {
+                    orders_status:
+                        document.getElementById(
+                            "order-status"
+                        ).value
+                };
+
+                try {
+                    const response = await fetch(
+                        "/api/orders/" + orderId,
+                        {
+                            method: "PATCH",
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+                            body: JSON.stringify(
+                                updateData
+                            )
+                        }
+                    );
+
+                    const data =
+                        await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(
+                            data.error ||
+                            "Unable to update order"
+                        );
+                    }
+
+                    statusMessage.textContent =
+                        "Order " +
+                        data.orders_id +
+                        " was updated successfully.";
+
+                    document.getElementById(
+                        "status-form"
+                    ).reset();
+
+                    await loadOrders();
+                } catch (error) {
+                    statusMessage.textContent =
+                        "Error: " + error.message;
+                }
+            }
+        );
+
+        loadOrders();
+    </script>
 
 </body>
 </html>

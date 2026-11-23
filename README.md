@@ -186,3 +186,49 @@ Flask API allows us to connect to the `my_diners_db` MySQL database and returns 
 
 ```text
 GET /api/inventory?page=1&size=10&name=Chicken
+
+## Step 5: Integration and Core Features
+
+The frontend is now connected to the Flask REST API and MySQL database. Due to API responses, the page updates without needing a manual refresh.
+
+### End-to-End Flows
+
+1. A customer order is created on the Orders page and saved to the database.
+2. The order then appears on the Kitchen page, where its preparation status can be updated.
+3. The Manager page allows an authenticated manager to add and update inventory records.
+
+### Supply Chain Model
+
+The Manager page uses the EOQ model from `supply_chain.py`. The user enters annual demand, ordering cost and holding cost. Flask calls the EOQ model and returns the recommended order quantity, orders per year, days between orders and total annual cost.
+
+### Live Metrics and KPIs
+
+- Total inventory items
+- Items in stock
+- Items requiring reorder
+- Stock availability percentage
+- Total kitchen orders
+- Received orders
+- Preparing orders
+- Ready orders
+- Completed orders
+
+### Manager Credentials
+
+- Username: `admin`
+- Password: `admin123`
+
+### Screenshots
+
+#### Orders Page
+
+![Orders page](screenshots/orders.png)
+
+#### Kitchen Page
+
+![Kitchen page](screenshots/kitchen.png)
+
+#### Manager Dashboard and EOQ Result
+
+![Manager dashboard](screenshots/manager.png)
+![Manager dashboard](screenshots/manager.png1)
