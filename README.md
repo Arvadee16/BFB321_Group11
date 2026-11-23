@@ -167,3 +167,22 @@ The `seed.sql` file contains realistic demonstration data for kitchen stations, 
 3. Open and execute `seed.sql`.
 4. Refresh the Schemas panel.
 5. Confirm that all five tables and the demonstration records are available.
+
+## Step 4: Flask REST API
+
+Flask API allows us to connect to the `my_diners_db` MySQL database and returns JSON responses.
+
+### API Endpoints
+
+| Method | Endpoint | Purpose | Authentication |
+|---|---|---|---|
+| POST | `/api/auth/login` | Generate a JWT access token | No |
+| GET | `/api/inventory` | List, paginate and filter inventory | No |
+| GET | `/api/inventory/<inventory_id>` | Retrieve one inventory item | No |
+| POST | `/api/inventory` | Create an inventory item | JWT required |
+| PATCH | `/api/inventory/<inventory_id>` | Update inventory quantity and reorder level | JWT required |
+
+### Pagination and filtering
+
+```text
+GET /api/inventory?page=1&size=10&name=Chicken
